@@ -4,7 +4,7 @@ const AWS = require('aws-sdk');
 process.env.DYNAMIC_CONFIG_AWS_REGION = 'ap-south-1';
 process.env.DYNAMIC_CONFIG_AWS_KEY = 'AKIA5RTSM74BBOL52JEA';
 process.env.DYNAMIC_CONFIG_AWS_SECRET =
-  '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';
+  '';
 process.env.DYNAMIC_CONFIG_AWS_BUCKET = 'sentry-test90426-dev';
 
 class S3Service {
