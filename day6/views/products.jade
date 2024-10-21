@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1 Shopify Products
+  .product-grid
+    each product in products
+      .product-card
+        img(src=product.image ? product.image.src : '/images/placeholder.jpg', alt=product.title)
+        h2= product.title
+        p= '$' + product.variants[0].price
+  
+  .pagination
+    if currentPage > 1
+      a(href='/products?page=' + (currentPage - 1)) Previous
+    a(href='/products?page=' + (currentPage + 1)) Next

@@ -16,9 +16,9 @@ const { DataTypes } = require('sequelize');
 const config = {
   DB_DATABASE: 'mysql',
   DB_USERNAME: 'root',
-  DB_PASSWORD: 'root',
+  DB_PASSWORD: '',
   DB_ADAPTER: 'mysql',
-  DB_NAME: 'day_1',
+  DB_NAME: 'day_4',
   DB_HOSTNAME: 'localhost',
   DB_PORT: 3306,
 };
@@ -46,7 +46,7 @@ let sequelize = new Sequelize(config.DB_DATABASE, config.DB_USERNAME, config.DB_
   },
 });
 
-// sequelize.sync({ force: true });
+sequelize.sync({ force: true });
 
 fs.readdirSync(__dirname)
   .filter((file) => {

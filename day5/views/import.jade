@@ -1,0 +1,8 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+  form(action="/api/v1/import" method="post" enctype="multipart/form-data")
+    input(type="file" name="file" accept=".csv")
+    input(type="submit" value="Import CSV")

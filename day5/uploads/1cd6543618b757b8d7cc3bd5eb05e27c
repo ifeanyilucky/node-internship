@@ -1,0 +1,6 @@
+id,order_id,user_id,shipping_dock_id,amount,discount,tax,total,notes,status
+1,ORD001,USR101,DOCK01,100.00,5.00,7.50,102.50,"First order",1
+2,ORD002,USR102,DOCK02,75.50,0.00,5.66,81.16,"Express shipping",1
+3,ORD003,USR103,DOCK01,200.00,20.00,13.50,193.50,"Bulk purchase",0
+4,ORD004,USR101,DOCK03,50.25,2.50,3.58,51.33,"Repeat customer",1
+5,ORD005,USR104,DOCK02,150.75,7.50,10.74,153.99,"New customer discount",0

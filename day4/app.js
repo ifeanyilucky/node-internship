@@ -3,9 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var cron = require('node-cron');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var emailRouter = require('./routes/emailRoutes');
 
 const db = require("./models");
 var cors = require("cors");
@@ -24,6 +26,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/email', emailRouter);
+
+// Set up cron job
+const emailQueue = require('./cronjob/email_queue');
+const emailSending = require('./cronjob/email_sending');
+
+// Schedule the cron job to run every minute
+cron.schedule('* * * * *', async () => {
+  console.log('Running cron job for email queue and sending...');
+  await emailQueue.processQueue();
+  await emailSending.sendEmails();
+});
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

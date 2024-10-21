@@ -1,5 +1,5 @@
 'use strict';
-/*Powered By: Manaknightdigital Inc. https://manaknightdigital.com/ Year: 2020*/
+/* Powered By: @Manaknightdigital Inc. https://manaknightdigital.com/ Year: 2020*/
 /**
  * Sequelize File
  * @copyright 2020 Manaknightdigital Inc.
@@ -14,11 +14,11 @@ let Sequelize = require('sequelize');
 const basename = path.basename(__filename);
 const { DataTypes } = require('sequelize');
 const config = {
-  DB_DATABASE: 'mysql',
+  DB_DATABASE: 'demo',
   DB_USERNAME: 'root',
-  DB_PASSWORD: 'root',
+  DB_PASSWORD: '',
   DB_ADAPTER: 'mysql',
-  DB_NAME: 'day_1',
+  DB_NAME: 'demo',
   DB_HOSTNAME: 'localhost',
   DB_PORT: 3306,
 };
@@ -47,6 +47,11 @@ let sequelize = new Sequelize(config.DB_DATABASE, config.DB_USERNAME, config.DB_
 });
 
 // sequelize.sync({ force: true });
+sequelize.sync({ force: true }).then(() => {
+  console.log('Database synchronized');
+}).catch((error) => {
+  console.error('Error synchronizing database:', error);
+});
 
 fs.readdirSync(__dirname)
   .filter((file) => {

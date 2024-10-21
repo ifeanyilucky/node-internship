@@ -16,9 +16,9 @@ const { DataTypes } = require('sequelize');
 const config = {
   DB_DATABASE: 'mysql',
   DB_USERNAME: 'root',
-  DB_PASSWORD: 'root',
+  DB_PASSWORD: '',
   DB_ADAPTER: 'mysql',
-  DB_NAME: 'day_1',
+  DB_NAME: 'day_7',
   DB_HOSTNAME: 'localhost',
   DB_PORT: 3306,
 };
@@ -46,7 +46,17 @@ let sequelize = new Sequelize(config.DB_DATABASE, config.DB_USERNAME, config.DB_
   },
 });
 
-// sequelize.sync({ force: true });
+sequelize
+  .query('SET FOREIGN_KEY_CHECKS = 0', { raw: true })
+  .then(() => {
+    return sequelize.sync({ force: true });
+  })
+  .then(() => {
+    return sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true });
+  })
+  .catch((error) => {
+    console.error('An error occurred while syncing the database:', error);
+  });
 
 fs.readdirSync(__dirname)
   .filter((file) => {
