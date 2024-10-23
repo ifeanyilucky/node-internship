@@ -10,6 +10,11 @@ var usersRouter = require('./routes/users');
 const db = require("./models");
 var cors = require("cors");
 
+// Import new middleware
+const authMiddleware = require('./middleware/auth');
+const roleMiddleware = require('./middleware/role');
+const maintenanceMiddleware = require('./middleware/maintenance');
+
 var app = express();
 app.set("db", db);
 // view engine setup
@@ -21,6 +26,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// maintenance middleware to all routes
+app.use(maintenanceMiddleware);
+
+// app.use('/api', authMiddleware);
+
+app.use('/api/v1', roleMiddleware);
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
@@ -36,9 +48,16 @@ app.use(function (err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // Send a more human-readable error message
+  const status = err.status || 500;
+  const message = status === 404 ? 'Resource not found' : 'An error occurred';
+  
+  res.status(status).json({
+    error: {
+      message: message,
+      details: req.app.get('env') === 'development' ? err.message : undefined
+    }
+  });
 });
 
 module.exports = app;

@@ -174,6 +174,12 @@ type Query {
   link: LinkResponse! @verifyUser
 
   getStepsImages: StepsImagesResponse!
+
+  movies: [Movie!]!
+  reviews: [Review!]!
+  directors: [Director!]!
+  actors: [Actor!]!
+  moviesWithMinReviews(minReviews: Int!): [Movie!]!
 }
 
 type Mutation {
@@ -210,4 +216,40 @@ type Mutation {
   deleteCustomImage(id: ID!): MutationResponse! @verifyUser
 
   uploadFile(file: Upload!): FileUploadResponse!
+  addActorToGenreMovies(actorId: ID!, genreName: String!): [Movie!]!
+}
+
+type Movie {
+  id: ID!
+  title: String!
+  director: Director!
+  main_genre: String!
+  status: String!
+  review: Review
+  actors: [Actor!]!
+  genres: [Genre!]!
+}
+
+type Review {
+  id: ID!
+  notes: String!
+  movie: Movie!
+}
+
+type Director {
+  id: ID!
+  name: String!
+  movies: [Movie!]!
+}
+
+type Actor {
+  id: ID!
+  name: String!
+  movies: [Movie!]!
+}
+
+type Genre {
+  id: ID!
+  name: String!
+  movies: [Movie!]!
 }
