@@ -1,0 +1,60 @@
+extends ../layout
+
+block content
+  h1= product.title
+  .row
+    .col-md-6
+      img.img-fluid(src='https://images.pexels.com/photos/27993161/pexels-photo-27993161/free-photo-of-a-person-holding-a-magnifying-glass-over-a-map-with-pink-flowers.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load', alt=product.title)
+    .col-md-6
+      p= product.description
+      p
+        strong Price: $#{typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
+      button.btn.btn-primary#buyNowBtn Buy Now
+      
+  
+  #checkoutModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='checkoutModalLabel', aria-hidden='true')
+    .modal-dialog(role='document')
+      .modal-content
+        .modal-header
+          h5#checkoutModalLabel.modal-title Checkout
+          button.close(type='button', data-dismiss='modal', aria-label='Close')
+            span(aria-hidden='true') &times;
+        .modal-body
+          #stripe-checkout-form
+        .modal-footer
+          button.btn.btn-secondary(type='button', data-dismiss='modal') Close
+
+block scripts
+  script(src='https://js.stripe.com/v3/')
+  script(src='/javascripts/stripe-checkout.js')
+  script.
+    console.log('Script block executed');
+    
+    async function handleBuyNowClick() {
+      console.log('Buy Now button clicked');
+      await initStripeCheckout('#{product.id}');
+      $('#checkoutModal').modal('show');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOMContentLoaded event fired');
+      const buyNowBtn = document.getElementById('buyNowBtn');
+      const checkoutModal = document.getElementById('checkoutModal');
+      
+      if (buyNowBtn && checkoutModal) {
+        console.log('Buy Now button and Checkout Modal found');
+        buyNowBtn.addEventListener('click', handleBuyNowClick);
+      } else {
+        console.error('Buy Now button or Checkout Modal not found');
+      }
+    });
+
+    // Fallback in case DOMContentLoaded doesn't fire
+    window.onload = function() {
+      console.log('Window onload event fired');
+      const buyNowBtn = document.getElementById('buyNowBtn');
+      if (buyNowBtn && !buyNowBtn.onclick) {
+        console.log('Adding click listener in window.onload');
+        buyNowBtn.addEventListener('click', handleBuyNowClick);
+      }
+    };

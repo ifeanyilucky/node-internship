@@ -1,0 +1,15 @@
+extends ../layout
+
+block content
+  h1 Products
+  .row
+    each product in products
+      .col-md-4.mb-4
+        .card
+          img.card-img-top.h-50.w-auto(src='https://images.pexels.com/photos/27993161/pexels-photo-27993161/free-photo-of-a-person-holding-a-magnifying-glass-over-a-map-with-pink-flowers.jpeg?auto=compress&cs=tinysrgb&w=800&lazy=load', alt=product.title)
+          .card-body
+            h5.card-title= product.title
+            p.card-text= product.description
+            p.card-text
+              strong $#{typeof product.price === 'number' ? product.price.toFixed(2) : product.price}
+            a.btn.btn-primary(href=`/products/${product.id}`) View Details

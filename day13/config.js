@@ -1,0 +1,4 @@
+module.exports = {
+  publish_key: "pk_test_51Ll5ukBgOlWo0lDUrBhA2W7EX2MwUH9AR5Y3KQoujf7PTQagZAJylWP1UOFbtH4UwxoufZbInwehQppWAq53kmNC00UIKSmebO",
+  secret_key: "sk_test_51Ll5ukBgOlWo0lDU83gVbZQHnEFerz8t1BfWdhljzwP1CBNsqa6HRXwMm7fQrYYMHC1F2M0WyGOvZLmInXTE9nE900EgqSdmn6",
+};

@@ -1,0 +1,17 @@
+extends ../layout
+
+block content
+  h1 Thank You for Your Purchase!
+  table.table
+    thead
+      tr
+        th Product
+        th Price
+        th Payment Method
+    tbody
+      tr
+        td= product.title
+        td $#{(session.amount_total / 100).toFixed(2)}
+        td= session.payment_method_types[0]
+  
+  a.btn.btn-primary(href='/products') Back to Products

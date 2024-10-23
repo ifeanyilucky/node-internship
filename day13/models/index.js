@@ -16,9 +16,9 @@ const { DataTypes } = require('sequelize');
 const config = {
   DB_DATABASE: 'mysql',
   DB_USERNAME: 'root',
-  DB_PASSWORD: 'root',
+  DB_PASSWORD: '',
   DB_ADAPTER: 'mysql',
-  DB_NAME: 'day_1',
+  DB_NAME: 'day_13',
   DB_HOSTNAME: 'localhost',
   DB_PORT: 3306,
 };
@@ -57,7 +57,7 @@ fs.readdirSync(__dirname)
     db[model.name] = model;
   });
 
-Object.keys(db).forEach((modelName) => {
+Object.keys(db).forEach(modelName => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
   }

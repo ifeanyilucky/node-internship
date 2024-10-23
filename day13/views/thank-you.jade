@@ -1,0 +1,25 @@
+extends layout
+
+block content
+  h1 Thank You for Your Purchase!
+  p Your order has been successfully processed.
+  
+  h2 Order Details:
+  table(style="width:100%; border-collapse: collapse;")
+    thead
+      tr
+        th(style="border: 1px solid black; padding: 8px;") Product
+        th(style="border: 1px solid black; padding: 8px;") Price
+        th(style="border: 1px solid black; padding: 8px;") Payment Method
+    tbody
+      tr
+        td(style="border: 1px solid black; padding: 8px;")= order.Product ? order.Product.title : 'Information not available'
+        td(style="border: 1px solid black; padding: 8px;")= `$${parseFloat(order.total).toFixed(2)}`
+        td(style="border: 1px solid black; padding: 8px;")= paymentMethod ? paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1) : 'Information not available'
+
+  p Order Status: #{order.status}
+  p Order ID: #{order.id}
+  
+  p We appreciate your business and hope you enjoy your purchase!
+  
+  a(href='/products') Back to Products
