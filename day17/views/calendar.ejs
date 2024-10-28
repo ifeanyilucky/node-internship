@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Calendar</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.43/moment-timezone-with-data.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="bg-indigo-900 text-white p-5 mb-5">
+        <h1 class="text-2xl">Calendar</h1>
+    </div>
+    <div class="max-w-4xl mx-auto p-5">
+        
+
+        <form id="appointmentForm" action="/api/appointments" method="POST" class="space-y-6">
+            <div>
+                <h2 class="text-xl font-semibold mb-2">Pick a date and time</h2>
+                <p class="mb-2">Duration: 1 hour</p>
+                <div class="mb-5 text-gray-600">
+                    Your timezone: <span id="userTimezone"></span>
+                    <button type="button" class="text-blue-500 underline cursor-pointer" id="changeTimezone">(Change)</button>
+                </div>
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="flex justify-between p-4 bg-gray-50 border-b border-gray-200">
+                        <button type="button" id="prevWeek" class="px-4 py-2 border border-gray-300 rounded bg-white hover:bg-gray-50">&lt; Previous Week</button>
+                        <button type="button" id="nextWeek" class="px-4 py-2 border border-gray-300 rounded bg-white hover:bg-gray-50">Next Week &gt;</button>
+                    </div>
+                    <div>
+                        <div class="days-header grid grid-cols-5 border-b border-gray-200"></div>
+                        <div class="time-slots-container grid grid-cols-5"></div>
+                    </div>
+                </div>
+                <input type="hidden" name="timezone" id="timezone">
+                <input type="hidden" name="selectedTime" id="selectedTime">
+                
+                <div id="timeSlots" class="grid grid-cols-auto-fill gap-2.5 my-5"></div>
+            </div>
+
+            <div id="userInfoForm" class="hidden space-y-4">
+                <h2 class="text-xl font-semibold">Additional Information</h2>
+                
+                <div>
+                    <label class="block mb-1">
+                        <span class="text-red-500">*</span>Full Name
+                    </label>
+                    <input type="text" name="fullName" required class="w-full p-2 border border-gray-300 rounded">
+                </div>
+
+                <div>
+                    <label class="block mb-1">
+                        <span class="text-red-500">*</span>Email
+                    </label>
+                    <input type="email" name="email" required class="w-full p-2 border border-gray-300 rounded">
+                </div>
+
+                <div>
+                    <label class="block mb-1">
+                        <span class="text-red-500">*</span>Company
+                    </label>
+                    <input type="text" name="company" required class="w-full p-2 border border-gray-300 rounded">
+                </div>
+
+                <div>
+                    <label class="block mb-1">
+                        <span class="text-red-500">*</span>Phone
+                    </label>
+                    <input type="tel" name="phone" required class="w-full p-2 border border-gray-300 rounded">
+                </div>
+
+                <div>
+                    <label class="block mb-1">
+                        <span class="text-red-500">*</span>Your Notes
+                    </label>
+                    <textarea name="notes" rows="4" required class="w-full p-2 border border-gray-300 rounded"></textarea>
+                </div>
+
+                <button type="submit" class="bg-blue-500 text-white px-5 py-2 rounded hover:bg-blue-600">Schedule Event</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Timezone Modal -->
+    <div id="timezoneModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="bg-white mx-auto my-[5%] p-5 rounded-lg w-4/5 max-w-4xl max-h-[80vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-5 pb-2.5 border-b border-gray-200">
+                <div>
+                    <h2 class="text-xl font-semibold">TIME ZONE</h2>
+                    <div class="mt-2">
+                        <label class="inline-flex items-center mr-4">
+                            <input type="radio" name="timeFormat" value="ampm" checked class="mr-2"> am/pm
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="timeFormat" value="24hr" class="mr-2"> 24hr
+                        </label>
+                    </div>
+                </div>
+                <span class="text-2xl text-gray-500 cursor-pointer hover:text-black close">&times;</span>
+            </div>
+            
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-lg font-medium text-gray-700 mb-4">USA/CANADA</h3>
+                    <div class="space-y-2" data-region="USA/CANADA">
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="America/Los_Angeles" class="mr-2">
+                            Pacific Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="America/Denver" class="mr-2">
+                            Mountain Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="America/New_York" class="mr-2">
+                            Eastern Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="America/Halifax" class="mr-2">
+                            Atlantic Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-medium text-gray-700 mb-4">EUROPE</h3>
+                    <div class="space-y-2" data-region="EUROPE">
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="Europe/Berlin" class="mr-2">
+                            Berlin Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="Europe/Helsinki" class="mr-2">
+                            Helsinki Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="Europe/Dublin" class="mr-2">
+                            Dublin Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="Europe/Samara" class="mr-2">
+                            Samara Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-medium text-gray-700 mb-4">ASIA</h3>
+                    <div class="space-y-2" data-region="ASIA">
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="Asia/Hong_Kong" class="mr-2">
+                            Hong Kong Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="Asia/Jakarta" class="mr-2">
+                            Jakarta Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="Asia/Kabul" class="mr-2">
+                            Kabul Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="Asia/Kathmandu" class="mr-2">
+                            Katmandu Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-medium text-gray-700 mb-4">SOUTH AMERICA</h3>
+                    <div class="space-y-2" data-region="SOUTH_AMERICA">
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="America/Bogota" class="mr-2">
+                            Bogota Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="America/Campo_Grande" class="mr-2">
+                            Campo Grande Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="America/Caracas" class="mr-2">
+                            Caracas Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                        <label class="flex items-center p-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="timezone" value="America/Lima" class="mr-2">
+                            Lima Time <span class="time-display ml-auto text-gray-600"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-gray-200 flex justify-end">
+                <button 
+                    id="confirmTimezone" 
+                    class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors"
+                >
+                    Okay
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="successMessage" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50">
+        <div class="bg-white mx-auto mt-[10%] p-8 rounded-lg w-4/5 max-w-lg text-center">
+            <div class="text-5xl mb-4 text-green-500">✓</div>
+            <h2 class="text-2xl font-semibold mb-4">Thanks for filling in the form!</h2>
+            <p class="text-gray-600 mb-6">You will be emailed next steps.</p>
+            <button onclick="window.location.href='/'" class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600">
+                Back to Home
+            </button>
+        </div>
+    </div>
+
+    <script>
+      
+        let userTimezone = moment.tz.guess();
+
+        // The rest of the initialization remains the same
+        document.getElementById('userTimezone').textContent = moment.tz(userTimezone).format('z (GMT[Z])');
+        document.getElementById('timezone').value = userTimezone;
+
+        // Add this line near the top of your script, after userTimezone declaration
+        let hasNavigatedForward = false;
+
+        // Add this variable to track the initial week
+        let initialWeekStart = moment().add(1, 'day').startOf('day');
+
+        function getWeekDates(startDate) {
+            const dates = [];
+            let start = moment().add(1, 'day').startOf('day'); // Start from tomorrow
+            
+            // If the provided startDate is after tomorrow, use that instead
+            if (moment(startDate).isAfter(start)) {
+                start = moment(startDate);
+            }
+            
+            // Get the current week's Monday
+            const currentMonday = moment(start).startOf('week').add(1, 'day');
+            
+            // If start date (tomorrow) is in current week, start from there
+            // Otherwise, start from Monday of the selected week
+            start = start.isSame(currentMonday, 'week') ? start : currentMonday;
+            
+            // Calculate remaining weekdays from the start date
+            const startDay = start.day();
+            for (let i = 0; i < 5; i++) { // Only weekdays
+                const currentDay = moment(start).add(i, 'days');
+                // Only add days that are tomorrow or later
+                if (currentDay.isSameOrAfter(moment().add(1, 'day').startOf('day'))) {
+                    dates.push(currentDay);
+                }
+            }
+            return dates;
+        }
+
+        function renderWeekView(startDate) {
+            const dates = getWeekDates(startDate);
+            const daysHeader = document.querySelector('.days-header');
+            const timeSlotsContainer = document.querySelector('.time-slots-container');
+            const prevWeekBtn = document.getElementById('prevWeek');
+            
+            // Show/hide previous week button based on whether we're on the initial week
+            if (moment(currentWeekStart).isSame(initialWeekStart, 'day')) {
+                prevWeekBtn.classList.add('hidden');
+            } else {
+                prevWeekBtn.classList.remove('hidden');
+            }
+            
+            // Clear existing content
+            daysHeader.innerHTML = '';
+            timeSlotsContainer.innerHTML = '';
+
+            // Render days header
+            dates.forEach(date => {
+                const dayColumn = document.createElement('div');
+                dayColumn.className = 'day-column';
+                dayColumn.innerHTML = `
+                    <div class="day-name text-center">${date.format('dddd')}</div>
+                    <div class="day-date text-center">${date.format('MMMM D')}</div>
+                `;
+                daysHeader.appendChild(dayColumn);
+            });
+
+            // Render time slots for each day
+            dates.forEach(date => {
+                const daySlots = document.createElement('div');
+                daySlots.className = 'day-slots';
+                timeSlotsContainer.appendChild(daySlots);
+
+                // Fetch and render slots for this day
+                fetchAvailableSlots(date.toDate());
+            });
+        }
+
+        // Update the fetchAvailableSlots function to handle the day index correctly
+        async function fetchAvailableSlots(date) {
+            try {
+                const tomorrow = moment().add(1, 'day').startOf('day');
+                // Skip if the date is today or in the past
+                if (moment(date).isBefore(tomorrow)) {
+                    return;
+                }
+
+                const response = await fetch(`/api/available-slots?date=${date.toISOString()}&timezone=${userTimezone}`);
+                const slots = await response.json();
+                
+                // Find the correct day slot by matching the date
+                const daySlots = Array.from(document.querySelectorAll('.day-slots')).find((slot, index) => {
+                    const slotDate = getWeekDates(currentWeekStart)[index];
+                    return slotDate && moment(date).isSame(slotDate, 'day');
+                });
+
+                if (daySlots) {
+                    slots.forEach(slot => {
+                        const slotTime = moment(slot);
+                        // Only show slots that are in the future
+                        if (slotTime.isAfter(tomorrow)) {
+                            const timeSlot = document.createElement('div');
+                            timeSlot.className = 'p-2 rounded text-center cursor-pointer hover:bg-gray-100 transition-colors';
+                            timeSlot.textContent = slotTime.format('h:mm A');
+                            timeSlot.onclick = () => selectTimeSlot(slot, timeSlot);
+                            daySlots.appendChild(timeSlot);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching time slots:', error);
+            }
+        }
+
+        // Initialize with current week
+        let currentWeekStart = moment().add(1, 'day').startOf('day'); // Start from tomorrow, beginning of day
+        renderWeekView(currentWeekStart);
+
+        // Update the nextWeek click handler
+        document.getElementById('nextWeek').addEventListener('click', () => {
+            hasNavigatedForward = true;
+            currentWeekStart = moment(currentWeekStart).add(1, 'week');
+            renderWeekView(currentWeekStart);
+        });
+
+        // Update the prevWeek click handler
+        document.getElementById('prevWeek').addEventListener('click', () => {
+            const proposedDate = moment(currentWeekStart).subtract(1, 'week');
+            
+            // Only allow going to previous week if it's not before the initial week
+            if (!proposedDate.isBefore(initialWeekStart, 'day')) {
+                currentWeekStart = proposedDate;
+                renderWeekView(currentWeekStart);
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('appointmentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch('/api/appointments', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    // Redirect to success page
+                    window.location.href = '/success';
+                } else {
+                    // Redirect to error page or show inline error
+                    const errorData = await response.json();
+                    document.getElementById('errorMessage').textContent = errorData.message || 'Failed to schedule appointment';
+                    document.getElementById('errorMessage').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('errorMessage').textContent = 'An error occurred. Please try again.';
+                document.getElementById('errorMessage').classList.remove('hidden');
+            }
+        });
+
+        // Modal elements
+        const modal = document.getElementById('timezoneModal');
+        const changeTimezoneBtn = document.getElementById('changeTimezone');
+        const closeBtn = document.querySelector('.close');
+        const confirmBtn = document.getElementById('confirmTimezone'); // Make sure this matches the button ID
+
+        changeTimezoneBtn.onclick = function() {
+            updateTimeDisplays();
+            modal.classList.remove('hidden');
+            
+            // Pre-select current timezone when opening modal
+            const currentTz = document.getElementById('timezone').value;
+            const radioBtn = document.querySelector(`input[name="timezone"][value="${currentTz}"]`);
+            if (radioBtn) {
+                radioBtn.checked = true;
+            }
+        }
+
+        // Close modal functions
+        closeBtn.onclick = function() {
+            modal.classList.add('hidden');
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        let timeFormat = 'ampm'; // Default format
+
+        // Update time format handling
+        document.querySelectorAll('input[name="timeFormat"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                timeFormat = e.target.value;
+                updateTimeDisplays();
+            });
+        });
+
+        // Update the updateTimeDisplays function
+        function updateTimeDisplays() {
+            const now = moment();
+            document.querySelectorAll('.time-display').forEach(span => {
+                const zone = span.closest('label').querySelector('input[name="timezone"]').value;
+                const time = now.tz(zone);
+                span.textContent = timeFormat === 'ampm' ? 
+                    time.format('h:mmA') : 
+                    time.format('HH:mm');
+            });
+        }
+
+        // Update the timezone selection handler
+        document.getElementById('confirmTimezone').onclick = function() {
+            const selectedTimezone = document.querySelector('input[name="timezone"]:checked');
+            if (selectedTimezone) {
+                userTimezone = selectedTimezone.value;
+                
+                document.getElementById('timezone').value = userTimezone;
+                
+                const format = timeFormat === 'ampm' ? 'z (GMT[Z])' : 'z [GMT]Z';
+                const timezoneDisplay = moment.tz(userTimezone).format(format);
+                document.getElementById('userTimezone').textContent = timezoneDisplay;
+                
+                document.querySelector('.time-slots-container').innerHTML = '';
+                
+                renderWeekView(currentWeekStart);
+                
+                modal.classList.add('hidden');
+                
+                document.getElementById('selectedTime').value = '';
+                document.getElementById('userInfoForm').classList.add('hidden');
+            } else {
+                alert('Please select a timezone');
+            }
+        }
+
+        function initializeTimezone() {
+            const initialTimezone = moment.tz.guess();
+            userTimezone = initialTimezone;
+            document.getElementById('timezone').value = initialTimezone;
+            
+            const radioBtn = document.querySelector(`input[name="timezone"][value="${initialTimezone}"]`);
+            if (radioBtn) {
+                radioBtn.checked = true;
+            }
+            
+            const format = timeFormat === 'ampm' ? 'z (GMT[Z])' : 'z [GMT]Z';
+            const timezoneDisplay = moment.tz(initialTimezone).format(format);
+            document.getElementById('userTimezone').textContent = timezoneDisplay;
+        }
+
+        initializeTimezone();
+
+        // Initial setup
+        updateTimeDisplays();
+        setInterval(updateTimeDisplays, 60000);
+
+        function selectTimeSlot(slot, element) {
+            document.querySelectorAll('.time-slot').forEach(slot => {
+                slot.classList.remove('bg-blue-500', 'text-white');
+                slot.classList.add('hover:bg-gray-50');
+            });
+            
+            element.classList.add('bg-blue-500', 'text-white');
+            element.classList.remove('hover:bg-gray-50');
+            
+            // Set the selected time
+            document.getElementById('selectedTime').value = slot;
+            
+            document.getElementById('userInfoForm').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -23,5 +23,13 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
+  Post.associate = (models) => {
+    Post.hasMany(models.Comment, { foreignKey: "post_id" });
+    Post.belongsToMany(models.Tag, {
+      through: "PostTags",
+      foreignKey: "post_id",
+    });
+  };
+
   return Post;
 };

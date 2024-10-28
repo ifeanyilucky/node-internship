@@ -63,7 +63,21 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
-sequelize.sync({ force: true });
+// Modified synchronization function
+const syncDatabase = async () => {
+  try {
+    await sequelize.query("SET FOREIGN_KEY_CHECKS = 0");
+    await sequelize.sync({ force: true });
+    await sequelize.query("SET FOREIGN_KEY_CHECKS = 1");
+    console.log("Database synchronized successfully.");
+  } catch (error) {
+    console.error("Error synchronizing database:", error);
+  }
+};
+
+// Call the synchronization function
+syncDatabase();
+
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 

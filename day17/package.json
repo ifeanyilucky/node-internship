@@ -14,6 +14,10 @@
     "jade": "~1.11.0",
     "morgan": "~1.9.1",
     "mysql2": "^2.3.3",
-    "sequelize": "^6.15.1"
+    "sequelize": "^6.15.1",
+    "ejs": "^3.1.9",
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
+    "uuid": "^9.0.0"
   }
 }
