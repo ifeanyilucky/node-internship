@@ -1,0 +1,196 @@
+extends layout
+
+block content
+  .calendar-container
+    h1 Appointment Calendar
+    
+    .date-picker
+      input#datePicker(type="date")
+    
+    .week-grid
+      .week-header
+        .day-cell Sunday
+        .day-cell Monday
+        .day-cell Tuesday
+        .day-cell Wednesday
+        .day-cell Thursday
+        .day-cell Friday
+        .day-cell Saturday
+      .week-body#weekGrid
+        //- Week days will be populated here
+    
+    .calendar-table#timeSlots(style="display: none;")
+      #weekendMessage.weekend-message(style="display: none;")
+        p No appointments available on weekends. Please select a weekday.
+      table.time-table
+        //- Existing time table structure...
+    
+    //- Existing booking form...
+    
+  style.
+    // Existing styles...
+    
+    .week-grid {
+      margin: 20px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .week-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .week-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    
+    .day-cell {
+      padding: 15px;
+      text-align: center;
+      border-right: 1px solid #ddd;
+    }
+    
+    .day-cell:last-child {
+      border-right: none;
+    }
+    
+    .date-cell {
+      padding: 20px;
+      text-align: center;
+      border-right: 1px solid #ddd;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .date-cell:last-child {
+      border-right: none;
+    }
+    
+    .date-cell.available {
+      background-color: #e8f5e9;
+    }
+    
+    .date-cell.unavailable {
+      background-color: #f5f5f5;
+      color: #999;
+      cursor: not-allowed;
+    }
+    
+    .date-cell:hover:not(.unavailable) {
+      background-color: #c8e6c9;
+    }
+    
+    .date-cell.selected {
+      background-color: #4CAF50;
+      color: white;
+    }
+    
+    .date-number {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .date-status {
+      font-size: 0.8em;
+    }
+
+  script.
+    document.addEventListener('DOMContentLoaded', function() {
+      const datePicker = document.getElementById('datePicker');
+      const weekGrid = document.getElementById('weekGrid');
+      const timeSlots = document.getElementById('timeSlots');
+      let availabilityData = null;
+      
+      // Load availability data when page loads
+      loadAvailabilityData();
+      loadAppointmentData();
+      async function loadAvailabilityData() {
+        try {
+          const response = await fetch('/api/v1/availability');
+          availabilityData = await response.json();
+          console.log('availabilityData', availabilityData);
+          renderWeekView();
+        } catch (error) {
+          console.error('Error loading availability:', error);
+        }
+      }
+      async function loadAppointmentData() {
+        try {
+          const response = await fetch('/api/v1/booked');
+          appointmentData = await response.json();
+          console.log('appointmentData', appointmentData);
+        } catch (error) {
+          console.error('Error loading appointments:', error);
+        }
+      }
+      
+      function renderWeekView() {
+        const currentDate = datePicker.value ? new Date(datePicker.value) : new Date();
+        const weekStart = getWeekStart(currentDate);
+        
+        weekGrid.innerHTML = '';
+        
+        for (let i = 0; i < 7; i++) {
+          const date = new Date(weekStart);
+          date.setDate(date.getDate() + i);
+          
+          const isAvailable = isDateAvailable(date);
+          const cell = document.createElement('div');
+          cell.className = `date-cell ${isAvailable ? 'available' : 'unavailable'}`;
+          
+          cell.innerHTML = `
+            <div class="date-number">${date.getDate()}</div>
+            <div class="date-status">
+              ${isAvailable ? 'Available' : 'Unavailable'}
+            </div>
+          `;
+          
+          if (isAvailable) {
+            cell.addEventListener('click', () => selectDate(date));
+          }
+          
+          weekGrid.appendChild(cell);
+        }
+      }
+      
+      function getWeekStart(date) {
+        const result = new Date(date);
+        result.setDate(result.getDate() - result.getDay());
+        return result;
+      }
+      
+      function isDateAvailable(date) {
+        if (!availabilityData) return false;
+        const dayOfWeek = date.getDay();
+        return availabilityData.some(avail => 
+          avail.dayOfWeek === dayOfWeek && avail.isAvailable
+        );
+      }
+      
+      function selectDate(date) {
+        // Update selected styling
+        document.querySelectorAll('.date-cell').forEach(cell => 
+          cell.classList.remove('selected')
+        );
+        event.currentTarget.classList.add('selected');
+        
+        // Update datepicker and load time slots
+        datePicker.value = date.toISOString().split('T')[0];
+        timeSlots.style.display = 'block';
+        loadTimeSlots();
+      }
+      
+      // Existing functions...
+      
+      // Update date picker handler
+      datePicker.addEventListener('change', () => {
+        renderWeekView();
+        timeSlots.style.display = 'none';
+      });
+    });
