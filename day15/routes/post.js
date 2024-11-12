@@ -6,16 +6,16 @@ const { literal } = require("sequelize");
 
 router.post("/posts", async (req, res) => {
   try {
-    const posts = await Post.bulkCreate(req.body, { returning: true });
-    res.status(201).json(posts.map((post) => post.id));
+    const posts = await Post.create(req.body, { returning: true });
+    res.status(201).json(posts.id);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.get("/posts/:ids", async (req, res) => {
+router.get("/posts/:id", async (req, res) => {
   try {
-    const ids = req.params.ids.split(",");
+    const id = req.params.id;
     const include = req.query.include
       ? req.query.include.split(",")
       : undefined;
@@ -26,56 +26,46 @@ router.get("/posts/:ids", async (req, res) => {
     const attributes = include || { exclude };
 
     const posts = await Post.findAll({
-      where: { id: ids },
+      where: { id },
       attributes,
     });
 
-    res.json(posts);
+    res.status(200).json(posts);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 });
 
-router.put("/posts/:ids", async (req, res) => {
+router.put("/posts/:id", async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const ids = req.params.ids.split(",");
+    const id = req.params.id;
     const updates = req.body;
 
-    if (ids.length !== updates.length) {
-      throw new Error("Number of IDs and updates do not match");
-    }
+    const results = await Post.update(updates, {
+      where: { id },
+      transaction,
+    });
 
-    const updatePromises = ids.map((id, index) =>
-      Post.update(updates[index], {
-        where: { id },
-        transaction,
-      })
-    );
-
-    const results = await Promise.all(updatePromises);
     await transaction.commit();
-    res.json(results.map((result) => result[0]));
+    res.status(200).json(results);
   } catch (error) {
     await transaction.rollback();
     res.status(400).json({ error: error.message });
   }
 });
 
-router.delete("/posts/:ids", async (req, res) => {
+router.delete("/posts/:id", async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const ids = req.params.ids.split(",");
-    const deletePromises = ids.map((id) =>
-      Post.destroy({
-        where: { id },
-        transaction,
-      })
-    );
+    const id = req.params.id;
+    const results = await Post.destroy({
+      where: { id },
+      transaction,
+    });
 
-    const results = await Promise.all(deletePromises);
     await transaction.commit();
-    res.json(results);
+    res.status(200).json(results);
   } catch (error) {
     await transaction.rollback();
     res.status(400).json({ error: error.message });
